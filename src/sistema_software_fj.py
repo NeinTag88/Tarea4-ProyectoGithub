@@ -533,5 +533,96 @@ class Reserva(EntidadSistema):
     def validar(self) -> bool:
         return self.__estado in self.ESTADOS
     
-        
+# Sistema Principal - Gestor Sistema
+
+class GestorSistema:
+    """Clase principal que orquesta clientes, servicios y reservas."""
+
+    def __init__(self):
+        self.__clientes: list = []
+        self.__servicios: list = []
+        self.__reservas: list = []
+
+    def registrar_cliente(self, nombre, email, telefono, documento):
+        try:
+            cliente = Cliente(nombre, email, telefono, documento)
+            self.__clientes.append(cliente)
+            log_evento(f"Cliente REGISTRADO: {cliente.describir()}", "info")
+            return cliente
+        except ErrorClienteInvalido as e:
+            log_evento(f"Fallo al registrar cliente '{nombre}': {e}", "error")
+            return None
+
+    def agregar_servicio(self, servicio) -> bool:
+        try:
+            if not servicio.validar():
+                raise ErrorServicioNoDisponible(
+                    f"El servicio '{servicio.nombre}' no es válido.", codigo=206
+                )
+            self.__servicios.append(servicio)
+            log_evento(f"Servicio AGREGADO: {servicio.describir()}", "info")
+            return True
+        except ErrorServicioNoDisponible as e:
+            log_evento(f"Fallo al agregar servicio: {e}", "error")
+            return False
+
+    def crear_reserva(self, cliente, servicio, duracion, descuento=0.0):
+        try:
+            if cliente is None:
+                raise ErrorReservaInvalida("Cliente no encontrado o inválido.", codigo=508)
+            if servicio is None:
+                raise ErrorReservaInvalida("Servicio no encontrado o inválido.", codigo=509)
+            reserva = Reserva(cliente, servicio, duracion, descuento)
+            reserva.confirmar()
+            self.__reservas.append(reserva)
+            return reserva
+        except ErrorReservaInvalida as e:
+            log_evento(f"Reserva NO creada: {e}", "error")
+            return None
+        except Exception as e:
+            log_evento(f"Error inesperado al crear reserva: {e}", "critical")
+            return None
+
+    def cancelar_reserva(self, reserva, motivo="Sin especificar") -> bool:
+        try:
+            return reserva.cancelar(motivo)
+        except ErrorReservaInvalida as e:
+            log_evento(f"No se pudo cancelar: {e}", "warning")
+            return False
+
+    def procesar_reserva(self, reserva) -> bool:
+        try:
+            return reserva.procesar()
+        except ErrorReservaInvalida as e:
+            log_evento(f"No se pudo procesar: {e}", "error")
+            return False
+
+    def listar_clientes(self):
+        print("\n" + "═"*70)
+        print("  CLIENTES REGISTRADOS")
+        print("═"*70)
+        for c in self.__clientes:
+            print(f"  ► {c.describir()}")
+        if not self.__clientes:
+            print("  (Sin clientes registrados)")
+
+    def listar_servicios(self):
+        print("\n" + "═"*70)
+        print("  SERVICIOS DISPONIBLES")
+        print("═"*70)
+        for s in self.__servicios:
+            print(f"  ► {s.describir()}")
+        if not self.__servicios:
+            print("  (Sin servicios registrados)")
+
+    def listar_reservas(self):
+        print("\n" + "═"*70)
+        print("  HISTORIAL DE RESERVAS")
+        print("═"*70)
+        for r in self.__reservas:
+            print(f"  ► {r.describir()}")
+        if not self.__reservas:
+            print("  (Sin reservas registradas)")
+            
+
     
