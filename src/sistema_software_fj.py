@@ -624,5 +624,120 @@ class GestorSistema:
         if not self.__reservas:
             print("  (Sin reservas registradas)")
             
+# Simulaciones
+
+def separador(titulo: str):
+    print(f"\n{'─'*70}")
+    print(f"  {titulo}")
+    print(f"{'─'*70}")
+
+
+def ejecutar_simulaciones():
+    gestor = GestorSistema()
+
+    print("\n" + "█"*70)
+    print("   SISTEMA INTEGRAL Software FJ – INICIO DE SIMULACIONES")
+    print("█"*70)
+
+    separador("OP 1 | Registro de clientes válidos")
+    c1 = gestor.registrar_cliente("Ana Gómez",    "ana.gomez@email.com",  "3001234567", "1020345678")
+    c2 = gestor.registrar_cliente("Luis Pérez",   "luis.perez@email.com", "3109876543", "987654321")
+    c3 = gestor.registrar_cliente("María Torres", "m.torres@correo.co",   "6017891234", "1100556677")
+
+    separador("OP 2 | Registro de clientes INVÁLIDOS")
+    gestor.registrar_cliente("Juan Sin Email",  "email_sin_arroba",  "3001111111", "2233445566")
+    gestor.registrar_cliente("Pedro Teléfono",  "pedro@mail.com",    "123",        "3344556677")
+    gestor.registrar_cliente("Sin Documento",   "sin.doc@mail.com",  "3002222222", "123")
+
+    separador("OP 3 | Creación de servicios válidos")
+    try:
+        sala_a    = ReservaSala("Sala Innovación A", capacidad=10, precio_hora=150_000)
+        equipo1   = AlquilerEquipo("Laptop HP ProBook", tipo_equipo="Portátil",
+                                   precio_dia=80_000, stock=5)
+        asesoria1 = AsesoriaEspecializada("Consultoría en Seguridad", especialidad="Seguridad",
+                                          precio_hora=200_000, asesor="Dr. Ramírez")
+        gestor.agregar_servicio(sala_a)
+        gestor.agregar_servicio(equipo1)
+        gestor.agregar_servicio(asesoria1)
+    except ErrorServicioNoDisponible as e:
+        log_evento(f"Error inesperado creando servicio válido: {e}", "critical")
+
+    separador("OP 4 | Creación de servicios INVÁLIDOS")
+    try:
+        ReservaSala("Sala sin precio", capacidad=5, precio_hora=-500)
+    except ErrorServicioNoDisponible as e:
+        log_evento(f"Servicio rechazado correctamente: {e}", "warning")
+        print(f"  ✗ Error esperado capturado: {e}")
+
+    try:
+        AsesoriaEspecializada("Asesoría Inválida", especialidad="Magia",
+                              precio_hora=100_000, asesor="Mago")
+    except ErrorServicioNoDisponible as e:
+        log_evento(f"Especialidad inválida rechazada: {e}", "warning")
+        print(f"  ✗ Error esperado capturado: {e}")
+
+    separador("OP 5 | Reserva exitosa – Sala con 10% descuento + IVA")
+    r1 = gestor.crear_reserva(c1, sala_a, duracion=3, descuento=0.10)
+    if r1:
+        print(f"  ✔ {r1.describir()}")
+
+    separador("OP 6 | Reserva exitosa – Alquiler de equipo 5 días")
+    r2 = gestor.crear_reserva(c2, equipo1, duracion=5, descuento=0.0)
+    if r2:
+        print(f"  ✔ {r2.describir()}")
+
+    separador("OP 7 | Reserva exitosa – Asesoría en Seguridad 2 horas")
+    r3 = gestor.crear_reserva(c3, asesoria1, duracion=2, descuento=0.05)
+    if r3:
+        print(f"  ✔ {r3.describir()}")
+
+    separador("OP 8 | Reserva FALLIDA – sala reservada por 12 horas (máx 8)")
+    r4 = gestor.crear_reserva(c1, sala_a, duracion=12)
+    print(f"  ✗ Reserva resultante: {r4}  (None = rechazada correctamente)")
+
+    separador("OP 9 | Reserva FALLIDA – servicio no disponible")
+    sala_cerrada = ReservaSala("Sala Mantenimiento", capacidad=6, precio_hora=100_000, disponible=False)
+    r5 = gestor.crear_reserva(c2, sala_cerrada, duracion=2)
+    print(f"  ✗ Reserva resultante: {r5}  (None = rechazada correctamente)")
+
+    separador("OP 10 | Cancelar una reserva confirmada")
+    if r2:
+        exito = gestor.cancelar_reserva(r2, motivo="Cliente solicitó cambio de fecha")
+        print(f"  {'✔' if exito else '✗'} Cancelación: {'exitosa' if exito else 'fallida'}")
+        print(f"  Estado actual: {r2.estado}")
+
+    separador("OP 11 | Cancelar reserva ya cancelada")
+    if r2:
+        exito2 = gestor.cancelar_reserva(r2, motivo="Intento duplicado")
+        print(f"  Resultado: {'error manejado correctamente' if not exito2 else 'cancelada de nuevo'}")
+
+    separador("OP 12 | Procesar reservas confirmadas")
+    if r1:
+        gestor.procesar_reserva(r1)
+        print(f"  ✔ Estado r1: {r1.estado}")
+    if r3:
+        gestor.procesar_reserva(r3)
+        print(f"  ✔ Estado r3: {r3.estado}")
+
+    separador("OP 13 | Procesar reserva ya procesada")
+    if r1:
+        resultado = gestor.procesar_reserva(r1)
+        print(f"  Resultado: {'error manejado correctamente' if not resultado else 'procesada (inesperado)'}")
+
+    gestor.listar_clientes()
+    gestor.listar_servicios()
+    gestor.listar_reservas()
+
+    print("\n" + "█"*70)
+    print("   SIMULACIONES COMPLETADAS – Revisa 'sistema_fj_logs.txt'")
+    print("█"*70)
+    log_evento("=== FIN DE SIMULACIONES ===", "info")
+    
+    
+# Punto de Entrada
+
+if __name__ == "__main__":
+    ejecutar_simulaciones()
+    
 
     
