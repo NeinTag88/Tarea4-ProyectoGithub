@@ -386,5 +386,152 @@ class AsesoriaEspecializada(Servicio):
             f"Asesor: {self.__asesor} | Precio/hora: ${self._precio_base:,.0f} COP | Estado: {estado}"
         )
         
+# Clase Reserva
+
+class Reserva(EntidadSistema):
+    """
+    Integra un cliente, un servicio, duración y estado.
+    Implementa confirmación, cancelación y procesamiento con manejo de excepciones.
+    """
+
+    ESTADOS = ["pendiente", "confirmada", "cancelada", "procesada"]
+
+    def __init__(self, cliente: Cliente, servicio: Servicio, duracion: float, descuento: float = 0.0):
+        nombre_reserva = f"Reserva-{cliente.nombre}-{servicio.nombre}"
+        super().__init__(nombre_reserva)
+        self.__cliente = cliente
+        self.__servicio = servicio
+        self.__duracion = duracion
+        self.__descuento = descuento
+        self.__estado = "pendiente"
+        self.__costo_total = 0.0
+        self.__fecha_reserva = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    @property
+    def cliente(self):
+        return self.__cliente
+
+    @property
+    def servicio(self):
+        return self.__servicio
+
+    @property
+    def estado(self):
+        return self.__estado
+
+    @property
+    def costo_total(self):
+        return self.__costo_total
+
+    def confirmar(self) -> bool:
+        """
+        Confirma la reserva validando disponibilidad y calculando el costo.
+        Usa try/except/else/finally para manejo completo de excepciones.
+        """
+        try:
+            if self.__estado != "pendiente":
+                raise ErrorReservaInvalida(
+                    f"La reserva #{self._id} ya está en estado '{self.__estado}'.", codigo=501
+                )
+            if not self.__servicio.disponible:
+                raise ErrorServicioNoDisponible(
+                    f"El servicio '{self.__servicio.nombre}' no está disponible.", codigo=502
+                )
+            if not self.__cliente.validar():
+                raise ErrorClienteInvalido(
+                    f"El cliente '{self.__cliente.nombre}' tiene datos incompletos.", codigo=503
+                )
+            self.__costo_total = self.__servicio.calcular_costo_total(
+                self.__duracion, self.__descuento, incluir_iva=True
+            )
+
+        except (ErrorServicioNoDisponible, ErrorClienteInvalido, ErrorDuracionInvalida) as e:
+            log_evento(f"Error al confirmar reserva #{self._id}: {e}", "error")
+            self.__estado = "cancelada"
+            raise ErrorReservaInvalida(
+                f"No se pudo confirmar la reserva: {e}", codigo=504
+            ) from e
+
+        except ErrorReservaInvalida as e:
+            log_evento(f"Reserva inválida #{self._id}: {e}", "warning")
+            raise
+
+        else:
+            self.__estado = "confirmada"
+            self.__cliente.agregar_reserva(self)
+            log_evento(
+                f"Reserva #{self._id} CONFIRMADA | Cliente: {self.__cliente.nombre} | "
+                f"Servicio: {self.__servicio.nombre} | Costo: ${self.__costo_total:,.2f} COP",
+                "info"
+            )
+            return True
+
+        finally:
+            log_evento(
+                f"Intento de confirmación finalizado para Reserva #{self._id} "
+                f"| Estado resultante: {self.__estado}",
+                "debug"
+            )
+
+    def cancelar(self, motivo: str = "Sin especificar") -> bool:
+        """Cancela una reserva confirmada o pendiente."""
+        try:
+            if self.__estado == "cancelada":
+                raise ErrorReservaInvalida(
+                    f"La reserva #{self._id} ya estaba cancelada.", codigo=505
+                )
+            if self.__estado == "procesada":
+                raise ErrorReservaInvalida(
+                    f"No se puede cancelar la reserva #{self._id}: ya fue procesada.", codigo=506
+                )
+            estado_anterior = self.__estado
+            self.__estado = "cancelada"
+
+        except ErrorReservaInvalida as e:
+            log_evento(f"Error al cancelar reserva #{self._id}: {e}", "warning")
+            raise
+
+        else:
+            log_evento(
+                f"Reserva #{self._id} CANCELADA (estaba '{estado_anterior}') | Motivo: {motivo}",
+                "info"
+            )
+            return True
+
+        finally:
+            log_evento(f"Proceso de cancelación completado para Reserva #{self._id}.", "debug")
+
+    def procesar(self) -> bool:
+        """Marca la reserva como procesada (servicio ya prestado)."""
+        try:
+            if self.__estado != "confirmada":
+                raise ErrorReservaInvalida(
+                    f"Solo se pueden procesar reservas confirmadas. Estado actual: '{self.__estado}'.",
+                    codigo=507
+                )
+            self.__estado = "procesada"
+
+        except ErrorReservaInvalida as e:
+            log_evento(f"Error al procesar reserva #{self._id}: {e}", "error")
+            raise
+
+        else:
+            log_evento(f"Reserva #{self._id} PROCESADA exitosamente.", "info")
+            return True
+
+        finally:
+            log_evento(f"Intento de procesamiento finalizado para Reserva #{self._id}.", "debug")
+
+    def describir(self) -> str:
+        return (
+            f"Reserva #{self._id} | Estado: {self.__estado.upper()} | "
+            f"Cliente: {self.__cliente.nombre} | Servicio: {self.__servicio.nombre} | "
+            f"Duración: {self.__duracion} u. | Descuento: {self.__descuento*100:.0f}% | "
+            f"Costo Total (c/IVA): ${self.__costo_total:,.2f} COP | Fecha: {self.__fecha_reserva}"
+        )
+
+    def validar(self) -> bool:
+        return self.__estado in self.ESTADOS
+    
         
     
