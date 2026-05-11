@@ -1,0 +1,36 @@
+2026-05-11 13:13:31 | INFO | Cliente REGISTRADO: Cliente #1 | Nombre: Ana Gómez | Email: ana.gomez@email.com | Tel: 3001234567 | Doc: 1020345678 | Reservas: 0
+2026-05-11 13:13:31 | INFO | Cliente REGISTRADO: Cliente #2 | Nombre: Luis Pérez | Email: luis.perez@email.com | Tel: 3109876543 | Doc: 987654321 | Reservas: 0
+2026-05-11 13:13:31 | INFO | Cliente REGISTRADO: Cliente #3 | Nombre: María Torres | Email: m.torres@correo.co | Tel: 6017891234 | Doc: 1100556677 | Reservas: 0
+2026-05-11 13:13:31 | ERROR | Fallo al registrar cliente 'Juan Sin Email': [Codigo 101] Email Invalido: 'email_sin_arroba' (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | ERROR | Fallo al registrar cliente 'Pedro Teléfono': [Codigo 102] Telefono Invalido: '123'. Debe contener al menos 7 digitos. (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | ERROR | Fallo al registrar cliente 'Sin Documento': [Codigo 103] Documento Invalido: '123'. Solo digitos, minimo 6. (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | INFO | Servicio AGREGADO: [SALA] Sala Innovación A | Capacidad: 10 personas | Precio/hora: $150,000 COP | Estado: Disponible
+2026-05-11 13:13:31 | INFO | Servicio AGREGADO: [EQUIPO] Laptop HP ProBook | Tipo: Portátil | Precio/dia: $80,000 COP | Stock: 5 | Estado: Disponible
+2026-05-11 13:13:31 | INFO | Servicio AGREGADO: [ASESORIA] Consultoría en Seguridad | Especialidad: Seguridad | Asesor: Dr. Ramírez | Precio/hora: $200,000 COP | Estado: Disponible
+2026-05-11 13:13:31 | WARNING | Servicio rechazado correctamente: [Codigo 201] El precio base deb ser positivo. Se recibio: -500 (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | WARNING | Especialidad inválida rechazada: [Codigo 205] Especialidad 'Magia' no valida. Opciones: ['sistemas', 'redes', 'base de datos', 'seguridad', 'negocios'] (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | INFO | Reserva #12 CONFIRMADA | Cliente: Ana Gómez | Servicio: Sala Innovación A | Costo: $481,950.00 COP
+2026-05-11 13:13:31 | DEBUG | Intento de confirmación finalizado para Reserva #12 | Estado resultante: confirmada
+2026-05-11 13:13:31 | INFO | Reserva #13 CONFIRMADA | Cliente: Luis Pérez | Servicio: Laptop HP ProBook | Costo: $476,000.00 COP
+2026-05-11 13:13:31 | DEBUG | Intento de confirmación finalizado para Reserva #13 | Estado resultante: confirmada
+2026-05-11 13:13:31 | INFO | Reserva #14 CONFIRMADA | Cliente: María Torres | Servicio: Consultoría en Seguridad | Costo: $520,030.00 COP
+2026-05-11 13:13:31 | DEBUG | Intento de confirmación finalizado para Reserva #14 | Estado resultante: confirmada
+2026-05-11 13:13:31 | ERROR | Error al confirmar reserva #15: [Codigo 402] Una sala no puede reservarse mas de 8 horas. Se solicito: 12 (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | DEBUG | Intento de confirmación finalizado para Reserva #15 | Estado resultante: cancelada
+2026-05-11 13:13:31 | ERROR | Reserva NO creada: [Codigo 504] No se pudo confirmar la reserva: [Codigo 402] Una sala no puede reservarse mas de 8 horas. Se solicito: 12 (2026-05-11 13:13:31) (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | ERROR | Error al confirmar reserva #17: [Codigo 502] El servicio 'Sala Mantenimiento' no está disponible. (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | DEBUG | Intento de confirmación finalizado para Reserva #17 | Estado resultante: cancelada
+2026-05-11 13:13:31 | ERROR | Reserva NO creada: [Codigo 504] No se pudo confirmar la reserva: [Codigo 502] El servicio 'Sala Mantenimiento' no está disponible. (2026-05-11 13:13:31) (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | INFO | Reserva #13 CANCELADA (estaba 'confirmada') | Motivo: Cliente solicitó cambio de fecha
+2026-05-11 13:13:31 | DEBUG | Proceso de cancelación completado para Reserva #13.
+2026-05-11 13:13:31 | WARNING | Error al cancelar reserva #13: [Codigo 505] La reserva #13 ya estaba cancelada. (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | DEBUG | Proceso de cancelación completado para Reserva #13.
+2026-05-11 13:13:31 | WARNING | No se pudo cancelar: [Codigo 505] La reserva #13 ya estaba cancelada. (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | INFO | Reserva #12 PROCESADA exitosamente.
+2026-05-11 13:13:31 | DEBUG | Intento de procesamiento finalizado para Reserva #12.
+2026-05-11 13:13:31 | INFO | Reserva #14 PROCESADA exitosamente.
+2026-05-11 13:13:31 | DEBUG | Intento de procesamiento finalizado para Reserva #14.
+2026-05-11 13:13:31 | ERROR | Error al procesar reserva #12: [Codigo 507] Solo se pueden procesar reservas confirmadas. Estado actual: 'procesada'. (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | DEBUG | Intento de procesamiento finalizado para Reserva #12.
+2026-05-11 13:13:31 | ERROR | No se pudo procesar: [Codigo 507] Solo se pueden procesar reservas confirmadas. Estado actual: 'procesada'. (2026-05-11 13:13:31)
+2026-05-11 13:13:31 | INFO | === FIN DE SIMULACIONES ===
